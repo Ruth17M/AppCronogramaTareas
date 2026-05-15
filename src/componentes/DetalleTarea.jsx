@@ -1,5 +1,6 @@
 import {useState, useEffect, useRef } from 'react'
-import {useTareas} from '../contexto/tareaContext'
+import {useDispatch} from 'react-redux'
+import { agregarTarea, editarTarea } from '../slices/TareaSlice'
 import styles from '../estilos/Styles.module.css'
 
 
@@ -9,7 +10,7 @@ function fechaHoy(){
 
 function DetalleTarea({tareaAEditar, cerrarFormulario}) {
 
-    const { agregarTarea, editarTarea } = useTareas()
+    const dispatch = useDispatch()
 
     const ModoEdicion = tareaAEditar != null && tareaAEditar != undefined
 
@@ -31,9 +32,9 @@ function DetalleTarea({tareaAEditar, cerrarFormulario}) {
         }
 
         if(ModoEdicion){
-            editarTarea(tareaAEditar.id, {titulo, descripcion, fecha})
+            dispatch(editarTarea({id: tareaAEditar.id, datos: {titulo, descripcion, fecha}}))
         }else {
-            agregarTarea({titulo, descripcion, fecha})
+            dispatch(agregarTarea({titulo, descripcion, fecha}))
         }
         cerrarFormulario()
     }

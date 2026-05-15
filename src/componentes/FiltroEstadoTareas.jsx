@@ -3,6 +3,7 @@ import styles from '../estilos/Styles.module.css'
 
 function FiltroEstadoTareas({ filtroActivo, alCambiar }) {
 
+    
 
     const opciones = [
         { valor: 'todas', etiqueta: 'Todas' },

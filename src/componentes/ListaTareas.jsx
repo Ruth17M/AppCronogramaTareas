@@ -1,12 +1,14 @@
 import { useMemo } from 'react'
-import { useTareas } from '../contexto/tareaContext'
+import { useSelector, useDispatch } from 'react-redux'
+import { eliminarTarea, cambiarEstado } from '../slices/TareaSlice'
 import TareaItem from './tareaItem'
 import styles from '../estilos/Styles.module.css'
 
 
 function ListaTareas({busqueda, filtroEstado, filtroFecha, aleditarTarea}) {
 
-    const { tareas, eliminarTarea, cambiarEstado } = useTareas()
+    const dispatch = useDispatch()
+    const tareas = useSelector(state => state.tareas.tareas)
 
     const tareasFiltradas = useMemo(() => {
 
@@ -50,16 +52,11 @@ function ListaTareas({busqueda, filtroEstado, filtroFecha, aleditarTarea}) {
                 <TareaItem
                 key={tarea.id}
                 tarea={tarea}
-                Completar={cambiarEstado}
+                Completar={(tarea) => dispatch(cambiarEstado(tarea))}
                 Editar={aleditarTarea}
-                Eliminar={eliminarTarea}
+                Eliminar={(id) => dispatch(eliminarTarea(id))}
                 />
             ))}
-
-            
-
-            
-
 
         </div>
     )

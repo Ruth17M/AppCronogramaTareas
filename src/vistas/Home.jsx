@@ -51,6 +51,7 @@ function Home ({usuario}) {
         filtroEstado={filtroEstado}
         filtroFecha={filtroFecha}
         aleditarTarea={aleditarTarea}
+        titulo="Mis Tareas"
     />
 
     </div>
