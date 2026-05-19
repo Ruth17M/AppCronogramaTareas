@@ -1,56 +1,117 @@
-import {createSlice} from '@reduxjs/toolkit'
+import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
 
+const API = "http://localhost:8000/tareas.php"
 
-const initialState = {
-    tareas: [
-        {
-            id: 1, 
-            titulo: "Tarea de ejemplo",
-            descripcion: "Descripción de la tarea de ejemplo",
-            fecha: '2024-05-08'
-        }
-    ]
-}
+export const listarTareas = createAsyncThunk(
+    'tareas/listar',
+    async () => {
+        const res = await fetch(API)
+        if (!res.ok) throw new Error('Error al cargar tareas')
+        return await res.json()
+    }
+)
 
+export const crearTarea = createAsyncThunk(
+    'tareas/crear',
+    async (datosTarea) => {
+        const res = await fetch(API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datosTarea)
+        })
+        if (!res.ok) throw new Error('Error al crear tarea')
+        return await res.json()
+    }
+)
+ 
+
+export const editarTareaAsync = createAsyncThunk(
+    'tareas/editar',
+    async ({ id, datos }) => {
+        const res = await fetch(API, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, ...datos })
+        })
+        if (!res.ok) throw new Error('Error al editar tarea')
+        return await res.json()
+    }
+)
+ 
+export const cambiarEstadoAsync = createAsyncThunk(
+    'tareas/cambiarEstado',
+    async (tarea) => {
+        const res = await fetch(API, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: tarea.id, completada: !tarea.completada })
+        })
+        if (!res.ok) throw new Error('Error al cambiar estado')
+        return await res.json()
+    }
+)
+ 
+export const eliminarTareaAsync = createAsyncThunk(
+    'tareas/eliminar',
+    async (id) => {
+        const res = await fetch(API, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        })
+        if (!res.ok) throw new Error('Error al eliminar tarea')
+        return id
+    }
+)
+ 
 const TareaSlice = createSlice({
     name: 'tareas',
-    initialState,
-        reducers:{
+    initialState: {
+        tareas: [],
+        cargando: false,
+        error: null  
+    },
+    reducers: {}, 
 
-             agregarTarea: (state, action) => {
-            const nuevaTarea = {
-                ...action.payload,
-                id: Date.now(),
-                completada: false
-            }
-            state.tareas.push(nuevaTarea)
-        },
+    extraReducers: (builder) => {
  
-        editarTarea: (state, action) => {
-            const { id, datos } = action.payload
-            const tarea = state.tareas.find(t => t.id === id)
-            if (tarea) {
-                tarea.titulo       = datos.titulo
-                tarea.descripcion  = datos.descripcion
-                tarea.fecha        = datos.fecha
+        builder.addCase(listarTareas.pending, (state) => {
+            state.cargando = true
+            state.error = null
+        })
+        builder.addCase(listarTareas.fulfilled, (state, action) => {
+            state.cargando = false
+            state.tareas = action.payload
+        })
+        builder.addCase(listarTareas.rejected, (state, action) => {
+            state.cargando = false
+            state.error = action.error.message
+        })
+ 
+        builder.addCase(crearTarea.fulfilled, (state, action) => {
+            state.tareas.push(action.payload)
+        })
+ 
+        builder.addCase(editarTareaAsync.fulfilled, (state, action) => {
+            const tareaActualizada = action.payload
+            const index = state.tareas.findIndex(t => t.id === tareaActualizada.id)
+            if (index !== -1) {
+                state.tareas[index] = tareaActualizada
             }
-        },
+        })
 
-            
-        eliminarTarea: (state, action) => {
+        builder.addCase(cambiarEstadoAsync.fulfilled, (state, action) => {
+            const tareaActualizada = action.payload
+            const index = state.tareas.findIndex(t => t.id === tareaActualizada.id)
+            if (index !== -1) {
+                state.tareas[index] = tareaActualizada
+            }
+        })
+ 
+        builder.addCase(eliminarTareaAsync.fulfilled, (state, action) => {
             state.tareas = state.tareas.filter(t => t.id !== action.payload)
-        },
- 
-        cambiarEstado: (state, action) => {
-            const tarea = state.tareas.find(t => t.id === action.payload.id)
-            if (tarea) {
-                tarea.completada = !tarea.completada
-            }
-        }
-        
+        })
     }
-
 })
-
-export const {agregarTarea, editarTarea, eliminarTarea, cambiarEstado} = TareaSlice.actions
+ 
 export default TareaSlice.reducer

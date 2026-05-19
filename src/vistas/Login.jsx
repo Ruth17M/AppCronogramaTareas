@@ -2,11 +2,11 @@ import { useState, useRef, useEffect } from 'react'
 import styles from '../estilos/Styles.module.css'
 
 function Login({IniciarSesion}) {
-
    
     const [usuario, setUsuario]   = useState('')
     const [password, setPassword] = useState('')
     const [error, setError]       = useState('')
+    const [cargando, setCargando] = useState(false)
  
     const usuarioRef = useRef(null)
  
@@ -14,11 +14,31 @@ function Login({IniciarSesion}) {
         usuarioRef.current?.focus()
     }, [])
  
-    const handleLogin = () => {
-        if (usuario === 'admin' && password === 'admin') {
-            IniciarSesion(usuario)
-        } else {
-            setError('Usuario o contraseña incorrectos')
+   const handleLogin = async () => {
+        setError('')
+        setCargando(true)
+ 
+        try {
+            const respuesta = await fetch('http://localhost:8000/login.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ usuario, password })
+            })
+ 
+            const datos = await respuesta.json()
+ 
+            if (respuesta.ok) {
+                IniciarSesion(datos.usuario)
+            } else {
+                setError(datos.error || 'Error al iniciar sesión')
+            }
+ 
+        } catch (e) {
+            setError('No se pudo conectar con el servidor.')
+        } finally {
+            setCargando(false)
         }
     }
  
@@ -27,7 +47,6 @@ function Login({IniciarSesion}) {
     }
  
     return (
-
         <div className={styles.loginPage}>
             <h1>El paso a la organización<br />comienza aquí</h1>
  
@@ -53,12 +72,15 @@ function Login({IniciarSesion}) {
  
                 {error && <p className={styles.error}>{error}</p>}
  
-                <button className={styles.loginButton} onClick={handleLogin}>
-                    Iniciar Sesión
+                <button
+                    className={styles.loginButton}
+                    onClick={handleLogin}
+                    disabled={cargando}
+                >
+                    {cargando ? 'Verificando...' : 'Iniciar Sesión'}
                 </button>
             </div>
         </div>
     )
 }
-
 export default Login

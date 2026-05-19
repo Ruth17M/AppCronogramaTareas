@@ -1,6 +1,6 @@
 import {useState, useEffect, useRef } from 'react'
 import {useDispatch} from 'react-redux'
-import { agregarTarea, editarTarea } from '../slices/TareaSlice'
+import { crearTarea, editarTareaAsync } from '../slices/TareaSlice'
 import styles from '../estilos/Styles.module.css'
 
 
@@ -17,6 +17,7 @@ function DetalleTarea({tareaAEditar, cerrarFormulario}) {
     const [titulo, setTitulo] = useState(ModoEdicion ? tareaAEditar.titulo : '')
     const [descripcion, setDescripcion] = useState(ModoEdicion ? tareaAEditar.descripcion : '')
     const [fecha, setFecha] = useState(ModoEdicion ? tareaAEditar.fecha : fechaHoy())
+    const [guardando, setGuardando] = useState(false)
 
     const refTitulo = useRef(null)
 
@@ -25,18 +26,29 @@ function DetalleTarea({tareaAEditar, cerrarFormulario}) {
         refTitulo.current.focus()
     }, [])
 
-    const alGuardar = () => {
+    const alGuardar = async () => {
         if(titulo.trim() === ''){
             alert('El título no puede estar vacío')
             return
         }
+        setGuardando(true)
 
-        if(ModoEdicion){
-            dispatch(editarTarea({id: tareaAEditar.id, datos: {titulo, descripcion, fecha}}))
-        }else {
-            dispatch(agregarTarea({titulo, descripcion, fecha}))
+       
+        try {
+            if (ModoEdicion) {
+                await dispatch(editarTareaAsync({
+                    id: tareaAEditar.id,
+                    datos: { titulo, descripcion, fecha }
+                }))
+            } else {
+                await dispatch(crearTarea({ titulo, descripcion, fecha }))
+            }
+            cerrarFormulario()
+        } catch (e) {
+            alert('Hubo un error al guardar la tarea')
+        } finally {
+            setGuardando(false)
         }
-        cerrarFormulario()
     }
 
 
@@ -70,8 +82,8 @@ function DetalleTarea({tareaAEditar, cerrarFormulario}) {
              />
              
              <div className={styles.popupBotones}>
-                <button className={styles.botonGuardar} onClick={alGuardar}>
-                    {ModoEdicion ? 'Guardar Cambios' : 'Agregar Tarea'}
+                <button className={styles.botonGuardar} onClick={alGuardar} disabled={guardando}>
+                    {guardando ? 'Guardando...' : ModoEdicion ? 'Guardar Cambios' : 'Agregar Tarea'}
                 </button>
 
                 <button className={styles.botonCancelar} onClick={cerrarFormulario}>

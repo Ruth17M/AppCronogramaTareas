@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { eliminarTarea, cambiarEstado } from '../slices/TareaSlice'
+import { listarTareas, eliminarTareaAsync, cambiarEstadoAsync } from '../slices/TareaSlice'
 import TareaItem from '../componentes/TareaItem'
 import styles from '../estilos/Styles.module.css'
 
@@ -9,6 +9,13 @@ function ListaTareas({busqueda, filtroEstado, filtroFecha, aleditarTarea}) {
 
     const dispatch = useDispatch()
     const tareas = useSelector(state => state.tareas.tareas)
+    const cargando = useSelector(state => state.tareas.cargando)
+    const error = useSelector(state => state.tareas.error)
+
+
+    useEffect(() => {
+        dispatch(listarTareas())
+    }, [dispatch])
 
     const tareasFiltradas = useMemo(() => {
 
@@ -32,6 +39,7 @@ function ListaTareas({busqueda, filtroEstado, filtroFecha, aleditarTarea}) {
     
     }, [tareas, filtroEstado, busqueda, filtroFecha])
 
+    if(error) return <p className={styles.sinTareas}>Error: {error}</p>
 
     return(
         <div className={styles.listaContainer}>
@@ -52,9 +60,9 @@ function ListaTareas({busqueda, filtroEstado, filtroFecha, aleditarTarea}) {
                 <TareaItem
                 key={tarea.id}
                 tarea={tarea}
-                Completar={(tarea) => dispatch(cambiarEstado(tarea))}
+                Completar={(tarea) => dispatch(cambiarEstadoAsync(tarea))}
                 Editar={aleditarTarea}
-                Eliminar={(id) => dispatch(eliminarTarea(id))}
+                Eliminar={(id) => dispatch(eliminarTareaAsync(id))}
                 />
             ))}
 
