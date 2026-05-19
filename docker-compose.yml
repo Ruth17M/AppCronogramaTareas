@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  task-manager:
+    build: .
+    container_name: gestor-tareas
+    ports:
+      - "3000:80"
+    restart: unless-stopped

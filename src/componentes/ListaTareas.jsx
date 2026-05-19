@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { eliminarTarea, cambiarEstado } from '../slices/TareaSlice'
-import TareaItem from './tareaItem'
+import TareaItem from '../componentes/TareaItem'
 import styles from '../estilos/Styles.module.css'
 
 
