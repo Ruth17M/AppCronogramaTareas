@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { useDispatch } from 'react-redux'
-import { useGetTareasQuery } from '../slices/tareasApi'
+import { useGetTareasQuery, useCambiarEstadoMutation } from '../slices/tareasApi'
+import { eliminarTareaAsync } from '../slices/TareaSlice'
 import { tareasApi } from '../slices/tareasApi'
-import { cambiarEstadoAsync, eliminarTareaAsync } from '../slices/TareaSlice'
 import TareaItem from '../componentes/TareaItem'
 import styles from '../estilos/Styles.module.css'
 
@@ -18,18 +18,15 @@ function ListaTareas({ busqueda, filtroEstado, filtroFecha, aleditarTarea }) {
         error,
     } = useGetTareasQuery()
 
-    const refrescarLista = () => {
-        dispatch(tareasApi.util.invalidateTags(['Tarea']))
-    }
+    const [cambiarEstado] = useCambiarEstadoMutation()
 
-    const handleCompletar = async (tarea) => {
-        await dispatch(cambiarEstadoAsync(tarea))
-        refrescarLista()
+    const handleCompletar = (tarea) => {
+        cambiarEstado(tarea)
     }
 
     const handleEliminar = async (id) => {
         await dispatch(eliminarTareaAsync(id))
-        refrescarLista()
+        dispatch(tareasApi.util.invalidateTags(['Tarea']))
     }
 
     const tareasFiltradas = useMemo(() => {
@@ -58,7 +55,7 @@ function ListaTareas({ busqueda, filtroEstado, filtroFecha, aleditarTarea }) {
 
     if (isError) return (
         <p className={styles.sinTareas}>
-            Error: {error?.error ?? 'El servidor PHP no esta corriendo en localhost:8000'}
+            Error: {error?.error ?? ' PHP no esta corriendo'}
         </p>
     )
 

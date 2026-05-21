@@ -57,7 +57,7 @@ if ($metodo === 'POST') {
     $tareas[] = $nuevaTarea;
     guardarTareas($archivo, $tareas);
 
-    http_response_code(201); // 201 = Created
+    http_response_code(201); 
     echo json_encode($nuevaTarea);
     exit();
 }

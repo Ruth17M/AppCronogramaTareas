@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useDispatch } from 'react-redux'
-import { crearTarea, editarTareaAsync } from '../slices/TareaSlice'
-import { tareasApi } from '../slices/tareasApi'
+import { useCrearTareaMutation, useEditarTareaMutation } from '../slices/tareasApi'
 import styles from '../estilos/Styles.module.css'
 
 function fechaHoy() {
@@ -10,14 +8,14 @@ function fechaHoy() {
 
 function DetalleTarea({ tareaAEditar, cerrarFormulario }) {
 
-    const dispatch = useDispatch()
+    const [crearTarea,  { isLoading: creando }]  = useCrearTareaMutation()
+    const [editarTarea, { isLoading: editando }] = useEditarTareaMutation()
 
     const ModoEdicion = tareaAEditar != null && tareaAEditar != undefined
 
     const [titulo,      setTitulo]      = useState(ModoEdicion ? tareaAEditar.titulo      : '')
     const [descripcion, setDescripcion] = useState(ModoEdicion ? tareaAEditar.descripcion : '')
     const [fecha,       setFecha]       = useState(ModoEdicion ? tareaAEditar.fecha        : fechaHoy())
-    const [guardando,   setGuardando]   = useState(false)
 
     const refTitulo = useRef(null)
 
@@ -30,27 +28,23 @@ function DetalleTarea({ tareaAEditar, cerrarFormulario }) {
             alert('El título no puede estar vacío')
             return
         }
-        setGuardando(true)
 
         try {
             if (ModoEdicion) {
-                await dispatch(editarTareaAsync({
+                await editarTarea({
                     id: tareaAEditar.id,
-                    datos: { titulo, descripcion, fecha }
-                }))
+                    datos: { titulo, descripcion, fecha },
+                }).unwrap()
             } else {
-                await dispatch(crearTarea({ titulo, descripcion, fecha }))
+                await crearTarea({ titulo, descripcion, fecha }).unwrap()
             }
-            
-            dispatch(tareasApi.util.invalidateTags(['Tarea']))
-
             cerrarFormulario()
         } catch (e) {
             alert('Hubo un error al guardar la tarea')
-        } finally {
-            setGuardando(false)
         }
     }
+
+    const guardando = creando || editando
 
     return (
         <div className={styles.popupFondo} onClick={cerrarFormulario}>
