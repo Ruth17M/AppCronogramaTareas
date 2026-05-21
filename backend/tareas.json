@@ -1,16 +1,9 @@
 [
     {
-        "id": 1779200527000,
-        "titulo": "Tarea de prueba 1",
-        "descripcion": "Esto es una tarea de prueba",
-        "fecha": "2026-05-23",
-        "completada": true
-    },
-    {
-        "id": 1779200882000,
-        "titulo": "tarea de prueba 3",
-        "descripcion": "hola esto es una tarea de prueba",
-        "fecha": "2026-05-19",
+        "id": 1779341060000,
+        "titulo": "xcds1",
+        "descripcion": "csdc",
+        "fecha": "2026-05-21",
         "completada": false
     }
 ]
